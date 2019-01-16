@@ -1,13 +1,15 @@
 package me.devnatan.happymc.quests.manager
 
-import me.devnatan.happymc.quests.HappyQuests
+import me.devnatan.happymc.quests.plugin.HappyQuests
 
-class TaskManager(val plugin: HappyQuests) {
+class TaskManager(private val plugin: HappyQuests) {
 
-    init {
+    fun start() {
 
     }
 
-    fun interrupt() {}
+    fun interrupt() {
+
+    }
 
 }

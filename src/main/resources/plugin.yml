@@ -1,6 +1,6 @@
-main: ${project.groupId}.HappyQuests
-name: ${project.artifactId}
-version: ${project.version}
+main: me.devnatan.happymc.quests.plugin.HappyQuests
+name: HappyQuests
+version: 1.0
 api-version: 1.8.8
 author: DevNatan
 description: Copyright (c) 2018 HappyMC. All rights reserved.
