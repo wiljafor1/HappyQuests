@@ -1,9 +1,11 @@
 package me.devnatan.happymc.quests.plugin
 
+import me.devnatan.happymc.quests.manager.GlobalActionManager
 import me.devnatan.happymc.quests.manager.PlayerManager
 import me.devnatan.happymc.quests.manager.QuestManager
 import me.devnatan.happymc.quests.manager.TaskManager
 import me.devnatan.happymc.quests.plugin.quests.BedQuest
+import me.devnatan.happymc.quests.util.dsl.unaryPlus
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -35,6 +37,17 @@ class HappyQuests : JavaPlugin() {
 
     private fun quests() {
         questManager += BedQuest()
+        questManager.registerAll()
+
+        GlobalActionManager.addAfter {
+            quest.whenComplete {
+                actor.sendMessage(" ")
+                actor.sendMessage(+" &b&lParabéns, você completou uma quest!")
+                actor.sendMessage(+" &fQuest: &a${quest.name}")
+                actor.sendMessage(+" &fObjetivos finalizados: &a${quest.objectives.joinToString(", ") { it.name }}")
+                actor.sendMessage(" ")
+            }
+        }
     }
 
     private fun players() {

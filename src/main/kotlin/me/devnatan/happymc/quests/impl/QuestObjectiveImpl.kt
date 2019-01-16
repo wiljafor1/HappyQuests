@@ -1,25 +1,24 @@
 package me.devnatan.happymc.quests.impl
 
-import me.devnatan.happymc.quests.api.objetive.QuestObjective
-import me.devnatan.happymc.quests.api.quest.QuestListener
-import org.bukkit.plugin.Plugin
+import me.devnatan.happymc.quests.api.QuestListener
+import me.devnatan.happymc.quests.api.QuestListenerEventBlock
+import me.devnatan.happymc.quests.api.objective.QuestObjective
 
-abstract class QuestObjectiveImpl(
+open class QuestObjectiveImpl(
         override val index: Int = 1,
         override val name: String = "Quest Objective",
         override var progressFrom: Int = 0,
-        override var progressTo: Int = 0,
-        override var next: QuestObjective? = null
+        override var progressTo: Int = progressFrom + 1
 ) : QuestObjective, QuestHandlerImpl() {
 
     override var isComplete: Boolean = false
-
-    override var plugin: Plugin? = null
 
     override var isUseListeners: Boolean = true
 
     override var active: Boolean = false
 
     override var delegate: QuestListener? = null
+
+    override var events: MutableList<QuestListenerEventBlock> = mutableListOf()
 
 }

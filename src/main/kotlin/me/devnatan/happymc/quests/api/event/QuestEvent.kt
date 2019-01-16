@@ -1,10 +1,7 @@
 package me.devnatan.happymc.quests.api.event
 
-import me.devnatan.happymc.quests.api.objetive.QuestObjective
-import me.devnatan.happymc.quests.api.quest.Quest
+import me.devnatan.happymc.quests.api.Quest
+import me.devnatan.happymc.quests.api.objective.QuestObjective
 import org.bukkit.entity.LivingEntity
 
-class QuestEvent(val actor: LivingEntity,
-        val quest: Quest,
-        val objective: QuestObjective,
-        val time: Long)
+class QuestEvent(val actor: LivingEntity, val quest: Quest, val objective: QuestObjective, val time: Long)

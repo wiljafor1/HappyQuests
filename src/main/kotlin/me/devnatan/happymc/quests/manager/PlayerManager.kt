@@ -1,6 +1,6 @@
 package me.devnatan.happymc.quests.manager
 
-import me.devnatan.happymc.quests.api.quest.Quest
+import me.devnatan.happymc.quests.api.Quest
 import me.devnatan.happymc.quests.plugin.HappyQuests
 import java.util.*
 

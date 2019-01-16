@@ -1,4 +1,4 @@
-package me.devnatan.happymc.quests.api.quest
+package me.devnatan.happymc.quests.api
 
 import me.devnatan.happymc.quests.api.event.QuestEvent
 
@@ -10,5 +10,9 @@ interface QuestCompletable {
     fun progress(event: QuestEvent)
 
     fun complete(event: QuestEvent)
+
+    fun next(event: QuestEvent)
+
+    fun hasNext(): Boolean
 
 }
