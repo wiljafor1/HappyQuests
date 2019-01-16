@@ -1,6 +1,53 @@
 # HappyQuests
 🏁 Objectives and missions to be completed by players.
 
+## Creating quickly (DSL)
+```kotlin
+/**
+ * When using QuestDSL you will not register it, just create it.
+ * To register, you must create your own quests manager.
+ */
+quest("My quest: join and jump") {
+    onComplete {
+        actor.sendMessage("All objectives has been complete!")
+    }
+    
+    // The first goal is automatically set as the quest's active target.
+    objective {
+        onComplete {
+            actor.sendMessage("First objective complete, joined the server!")
+        }
+        
+        // You can add Bukkit events directly to a Quest or objective!
+        event<PlayerJoinEvent> {
+            // If quest and objective is active
+            ifActive {
+
+                /**
+                 * If complete, the current goal will be set to the next,
+                 * if there is not one the next quest will be complete.
+                 */
+                progress(questEvent(player))
+            }
+        }
+    }
+
+    objective {
+        onComplete {
+            actor.sendMessage("Second objective complete, jumped!")
+        }
+        
+        event<PlayerMoveEvent> {
+            if (jumped) {
+                ifActive {
+                    progress(questEvent(player))
+                }
+            }
+        }
+    }
+}
+```
+
 ## Creating you own quest
 ```kotlin
 import me.devnatan.happymc.quests.plugin.event
