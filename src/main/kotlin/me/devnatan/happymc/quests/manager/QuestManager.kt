@@ -1,8 +1,8 @@
 package me.devnatan.happymc.quests.manager
 
 import me.devnatan.happymc.quests.api.Quest
+import me.devnatan.happymc.quests.api.unregister
 import me.devnatan.happymc.quests.plugin.HappyQuests
-import me.devnatan.happymc.quests.plugin.unregister
 
 class QuestManager(private val plugin: HappyQuests) {
 
@@ -14,8 +14,12 @@ class QuestManager(private val plugin: HappyQuests) {
 
     fun registerAll() {
         quests.forEach {
-            it.call(plugin)
-            plugin.logger.info("Quest \"${it.name}\" with ${it.objectives.size} objectives registered.")
+            it.plugin = plugin
+            it.objectives.forEach {
+                obj -> obj.plugin = plugin
+            }
+            it.call()
+            plugin.logger.info("Quest \"${it.name}\" with ${it.objectives.size} objectives registered to ${it.plugin!!.name}.")
         }
     }
 
@@ -25,6 +29,10 @@ class QuestManager(private val plugin: HappyQuests) {
             it.unregister()
         }
         quests.clear()
+    }
+
+    operator fun get(name: String): Quest? {
+        return quests.find { it.name == name }
     }
 
     operator fun plusAssign(quest: Quest) {

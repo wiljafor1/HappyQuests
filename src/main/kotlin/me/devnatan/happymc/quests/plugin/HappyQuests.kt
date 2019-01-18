@@ -1,66 +1,71 @@
 package me.devnatan.happymc.quests.plugin
 
-import me.devnatan.happymc.quests.manager.GlobalActionManager
+import me.devnatan.happymc.quests.api.event
+import me.devnatan.happymc.quests.api.listener
+import me.devnatan.happymc.quests.api.task.QuestSchedulerController
 import me.devnatan.happymc.quests.manager.PlayerManager
 import me.devnatan.happymc.quests.manager.QuestManager
-import me.devnatan.happymc.quests.manager.TaskManager
-import me.devnatan.happymc.quests.plugin.quests.BedQuest
-import me.devnatan.happymc.quests.util.dsl.unaryPlus
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
+import me.devnatan.happymc.quests.manager.action
+import me.devnatan.happymc.quests.plugin.quests.TutorialQuest
+import org.bukkit.event.player.PlayerBedEnterEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class HappyQuests : JavaPlugin() {
 
     lateinit var questManager: QuestManager
-    lateinit var taskManager: TaskManager
     lateinit var playerManager: PlayerManager
 
     override fun onEnable() {
         managers()
         quests()
+        actions()
         players()
-        tasks()
     }
 
     override fun onDisable() {
         questManager.unregisterAll()
-        taskManager.interrupt()
+        QuestSchedulerController.cancelAll()
     }
 
     private fun managers() {
         questManager = QuestManager(this)
-        taskManager = TaskManager(this)
         playerManager = PlayerManager(this)
     }
 
     private fun quests() {
-        questManager += BedQuest()
+        questManager += TutorialQuest()
         questManager.registerAll()
+    }
 
-        GlobalActionManager.addAfter {
-            quest.whenComplete {
-                actor.sendMessage(" ")
-                actor.sendMessage(+" &b&lParabéns, você completou uma quest!")
-                actor.sendMessage(+" &fQuest: &a${quest.name}")
-                actor.sendMessage(+" &fObjetivos finalizados: &a${quest.objectives.joinToString(", ") { it.name }}")
-                actor.sendMessage(" ")
+    private fun actions() {
+        action {
+            onObjectiveComplete {
+                actor.sendMessage("Objective complete!")
+            }
+
+            onQuestComplete {
+                actor.sendMessage("Quest complete!")
             }
         }
     }
 
     private fun players() {
-        server.pluginManager.registerEvents(object: Listener {
-            @EventHandler fun on(e: PlayerJoinEvent) {
-                playerManager += e.player.uniqueId
-                playerManager += e.player.uniqueId to BedQuest()
+        listener(this) {
+            event<PlayerJoinEvent> {
+                player.sendMessage("joined")
+                playerManager += player
+                playerManager += player to questManager["Tutorial"]
             }
-        }, this)
-    }
 
-    private fun tasks() {
-        taskManager.start()
+            event<PlayerBedEnterEvent> {
+                playerManager.find(player, "Tutorial") {
+                    isActive && !isComplete
+                }?.let {
+                    it.complete(player)
+                }
+            }
+        }
     }
 
 }

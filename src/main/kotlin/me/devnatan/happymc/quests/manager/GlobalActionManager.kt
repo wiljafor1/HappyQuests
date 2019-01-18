@@ -1,29 +1,59 @@
 package me.devnatan.happymc.quests.manager
 
-import me.devnatan.happymc.quests.api.objective.QuestObjectiveAction
-import me.devnatan.happymc.quests.api.objective.QuestObjectiveActionSide
+import me.devnatan.happymc.quests.api.EnumQuestAction
+import me.devnatan.happymc.quests.api.EnumQuestActionTarget
+import me.devnatan.happymc.quests.api.QuestAction
 
 object GlobalActionManager {
 
-    private val middlewares: MutableMap<QuestObjectiveAction, QuestObjectiveActionSide> = mutableMapOf()
+    private val actions: MutableMap<QuestAction, Pair<Array<out EnumQuestAction>, Array<out EnumQuestActionTarget>>> = mutableMapOf()
 
-    fun allBefore() = middlewares.filter { it.value == QuestObjectiveActionSide.BEFORE }.map { it.key }
-    fun allAfter() = middlewares.filter { it.value == QuestObjectiveActionSide.AFTER }.map { it.key }
-    
-    fun addBefore(middleware: QuestObjectiveAction) {
-        middlewares[middleware] = QuestObjectiveActionSide.BEFORE
+    fun all(predicate1: (EnumQuestAction) -> Boolean, predicate2: (EnumQuestActionTarget) -> Boolean): Array<QuestAction> {
+        return actions.entries.filter {
+            (it.value.first.all(predicate1) or it.value.first.any {
+                act -> act == EnumQuestAction.ALL
+            }) and (it.value.second.any(predicate2) or it.value.second.any {
+                tgt -> tgt == EnumQuestActionTarget.ALL
+            })
+        }.map {
+            it.key
+        }.toTypedArray()
     }
 
-    fun addAfter(middleware: QuestObjectiveAction) {
-        middlewares[middleware] = QuestObjectiveActionSide.AFTER
+    internal fun add(action: QuestAction,
+                     targets: Array<out EnumQuestActionTarget> = arrayOf(EnumQuestActionTarget.ALL),
+                     actions: Array<out EnumQuestAction> = arrayOf(EnumQuestAction.ALL)) {
+        if (actions.isNotEmpty())
+            this.actions[action] = actions to targets
     }
 
-    operator fun plusAssign(middleware: QuestObjectiveAction) {
-        addAfter(middleware)
+    fun action(action: QuestAction) {
+        GlobalActionManager.add(action)
     }
-    
-    operator fun minusAssign(middleware: QuestObjectiveAction) {
-        addBefore(middleware)
+
+}
+
+class QuestActionBody {
+
+    private fun on(target: EnumQuestActionTarget, vararg actions: EnumQuestAction = arrayOf(), block: QuestAction) {
+        GlobalActionManager.add(block, arrayOf(target), actions.toList().toTypedArray())
     }
-    
+
+    fun onQuest(block: QuestAction): Unit = on(EnumQuestActionTarget.QUEST, EnumQuestAction.ALL, block = block)
+    fun onQuestStart(block: QuestAction): Unit = on(EnumQuestActionTarget.QUEST, EnumQuestAction.START, block = block)
+    fun onQuestFail(block: QuestAction): Unit = on(EnumQuestActionTarget.QUEST, EnumQuestAction.FAIL, block = block)
+    fun onQuestProgress(block: QuestAction): Unit = on(EnumQuestActionTarget.QUEST, EnumQuestAction.PROGRESS, block = block)
+    fun onQuestComplete(block: QuestAction): Unit = on(EnumQuestActionTarget.QUEST, EnumQuestAction.COMPLETE, block = block)
+
+    fun onObjective(block: QuestAction): Unit = on(EnumQuestActionTarget.OBJECTIVE, EnumQuestAction.ALL, block = block)
+    fun onObjectiveStart(block: QuestAction): Unit = on(EnumQuestActionTarget.OBJECTIVE, EnumQuestAction.START, block = block)
+    fun onObjectiveFail(block: QuestAction): Unit = on(EnumQuestActionTarget.OBJECTIVE, EnumQuestAction.FAIL, block = block)
+    fun onObjectiveProgress(block: QuestAction): Unit = on(EnumQuestActionTarget.OBJECTIVE, EnumQuestAction.PROGRESS, block = block)
+    fun onObjectiveComplete(block: QuestAction): Unit = on(EnumQuestActionTarget.OBJECTIVE, EnumQuestAction.COMPLETE, block = block)
+
+
+}
+
+fun action(block: QuestActionBody.() -> Unit) {
+    block(QuestActionBody())
 }

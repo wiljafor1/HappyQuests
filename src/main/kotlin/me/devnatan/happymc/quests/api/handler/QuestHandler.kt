@@ -7,25 +7,20 @@ typealias QuestEventBlock = QuestEvent.() -> Unit
 interface QuestHandler {
 
     var start: QuestEventBlock?
-    var stop: QuestEventBlock?
-    var complete: QuestEventBlock?
     var fail: QuestEventBlock?
+    var complete: QuestEventBlock?
     var progress: QuestEventBlock?
 
     fun onStart(block: QuestEventBlock) {
         start = block
     }
 
-    fun onStop(block: QuestEventBlock) {
-        stop = block
+    fun onFail(block: QuestEventBlock) {
+        fail = block
     }
 
     fun onComplete(block: QuestEventBlock) {
         complete = block
-    }
-
-    fun onFail(block: QuestEventBlock) {
-        fail = block
     }
 
     fun onProgress(block: QuestEventBlock) {
